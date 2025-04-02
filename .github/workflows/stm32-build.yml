@@ -1,0 +1,56 @@
+name: Build and Release STM32 Project
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build STM32CubeIDE project
+        uses: xanderhendriks/action-build-stm32cubeide@v15.0
+        with:
+          project-path: '.'
+          project-target: 'stm32-auto-build-versioning-github-actions/Debug'
+
+      - name: Extract Version from Commit Message
+        id: extract_version
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ $COMMIT_MSG =~ (v[0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            # Extract version and format release name
+            VERSION=${BASH_REMATCH[1]}
+            CLEAN_VERSION=$(echo "$VERSION" | sed 's/v//; s/\.//g')
+            echo "TAG_NAME=$VERSION" >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ledblinkfw$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          else
+            # Fallback to date-based naming
+            DATE=$(date +'%Y%m%d')
+            SHA=$(git rev-parse --short HEAD)
+            echo "TAG_NAME=autorelease-$DATE-$SHA" >> $GITHUB_OUTPUT
+            echo "RELEASE_NAME=ledblinkfw-auto-$DATE-$SHA" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.extract_version.outputs.TAG_NAME }}
+          name: ${{ steps.extract_version.outputs.RELEASE_NAME }}
+          files: |
+            stm32-auto-build-versioning-github-actions/Debug/*.bin
+            stm32-auto-build-versioning-github-actions/Debug/*.elf
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-binaries
+          path: ./Debug/*.bin
