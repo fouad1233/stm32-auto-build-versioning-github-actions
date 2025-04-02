@@ -7,6 +7,8 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for releases
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,13 +26,11 @@ jobs:
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           if [[ $COMMIT_MSG =~ (v[0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            # Extract version and format release name
             VERSION=${BASH_REMATCH[1]}
             CLEAN_VERSION=$(echo "$VERSION" | sed 's/v//; s/\.//g')
             echo "TAG_NAME=$VERSION" >> $GITHUB_OUTPUT
             echo "RELEASE_NAME=ledblinkfw$CLEAN_VERSION" >> $GITHUB_OUTPUT
           else
-            # Fallback to date-based naming
             DATE=$(date +'%Y%m%d')
             SHA=$(git rev-parse --short HEAD)
             echo "TAG_NAME=autorelease-$DATE-$SHA" >> $GITHUB_OUTPUT
@@ -43,8 +43,8 @@ jobs:
           tag_name: ${{ steps.extract_version.outputs.TAG_NAME }}
           name: ${{ steps.extract_version.outputs.RELEASE_NAME }}
           files: |
-            stm32-auto-build-versioning-github-actions/Debug/*.bin
-            stm32-auto-build-versioning-github-actions/Debug/*.elf
+            Debug/*.bin
+            Debug/*.elf
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,4 +53,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: firmware-binaries
-          path: ./Debug/*.bin
+          path: Debug/*.bin
