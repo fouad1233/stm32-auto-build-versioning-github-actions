@@ -1,32 +1,20 @@
-# Prerequisites
-*.d
+####################################################################
+# These are ignored file and folder patterns.                      #
+#                                                                  #
+# Project: STM32CubeIDE                                            #
+# Fouad Aladhami, 2025-04-02, v1.0                                 #
+#                                                                  #
+# Learn more about .gitignore:                                     #
+# https://www.atlassian.com/git/tutorials/saving-changes/gitignore #
+####################################################################
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+# Folders
+.settings/
+/Debug/
 
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# Project stuff
+.mxproject
+.launch
 
 # Executables
 *.exe
@@ -35,18 +23,19 @@
 *.i*86
 *.x86_64
 *.hex
+*.bin
+*.list
+*.map
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# System Files
+.DS_Store
+Thumbs.db
+/mb100-ltc6811-konya Debug.launch
+/Release/
+/cmake/
+/CMakePresets.json
+/CMakeLists.txt
+/vcpkg-configuration.json
+*.launch
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+.codegpt
